@@ -334,7 +334,7 @@ export const translations = {
     serenity: {
       treeTitle: "Bonsai Tree",
       treeDefinition: "Definition",
-      treeTitleMain: "Bonsai Tree",
+      treeTitleMain: "BONSAI",
       treeDesc1: "It is an art that blends horticulture, design, and meditation, requiring patience, precision, and skill.",
       treeDesc2: "Bonsai is a traditional Japanese art that involves growing trees in small containers. It is a craft passed down from generation to generation, rooted in a spirit of respect and contemplation. This quiet passion has become a reflection of refined taste.",
       treeQuote: "\"Owning a bonsai tree in Japan is considered a symbol of sophistication, calm presence, and deep appreciation for silent beauty.\"",
@@ -657,7 +657,7 @@ export const translations = {
     serenity: {
       treeTitle: "شجرة بونساي",
       treeDefinition: "تعريف",
-      treeTitleMain: "شجرة بونساي",
+      treeTitleMain: "بونساي",
       treeDesc1: "إنها فن يمزج البستنة والتصميم والتأمل، يتطلب الصبر والدقة والمهارة.",
       treeDesc2: "بونساي هي فن ياباني تقليدي يتضمن زراعة الأشجار في حاويات صغيرة. إنها حرفة انتقلت من جيل إلى آخر، متجذرة في روح الاحترام والتأمل. أصبحت هذه الشغف الهادئ انعكاساً للذوق المحسّن.",
       treeQuote: "\"امتلاك شجرة بونساي في اليابان يُعتبر رمزاً للرقي والهدوء العميق والتقدير العميق للجمال الصامت.\"",

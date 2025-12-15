@@ -5,84 +5,84 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 // SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS
 
 interface ContactFormData {
-    firstName: string;
-    lastName: string;
-    mobile: string;
-    email: string;
-    contactObjective: string;
-    unitType?: string;
-    objective?: string;
-    payment?: string;
-    message: string;
-    language: string;
+  firstName: string;
+  lastName: string;
+  mobile: string;
+  email: string;
+  contactObjective: string;
+  unitType?: string;
+  objective?: string;
+  payment?: string;
+  message: string;
+  language: string;
 }
 
 export default async function handler(
-    req: VercelRequest,
-    res: VercelResponse
+  req: VercelRequest,
+  res: VercelResponse
 ) {
-    // Only allow POST requests
-    if (req.method !== 'POST') {
-        return res.status(405).json({ error: 'Method not allowed' });
+  // Only allow POST requests
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  try {
+    const formData: ContactFormData = req.body;
+
+    // Validate required fields
+    if (!formData.firstName || !formData.lastName || !formData.email || !formData.message) {
+      return res.status(400).json({ error: 'Missing required fields' });
     }
 
-    try {
-        const formData: ContactFormData = req.body;
+    // Format the email content
+    const emailSubject = 'New Contact Form Submission - Bonsai Website';
+    const emailBody = formatEmailBody(formData);
 
-        // Validate required fields
-        if (!formData.firstName || !formData.lastName || !formData.email || !formData.message) {
-            return res.status(400).json({ error: 'Missing required fields' });
-        }
+    // Send email using Resend API (recommended for Vercel)
+    const resendApiKey = process.env.RESEND_API_KEY;
 
-        // Format the email content
-        const emailSubject = 'New Contact Form Submission - Bonsai Website';
-        const emailBody = formatEmailBody(formData);
-
-        // Send email using Resend API (recommended for Vercel)
-        const resendApiKey = process.env.RESEND_API_KEY;
-
-        if (!resendApiKey) {
-            console.error('RESEND_API_KEY not configured');
-            return res.status(500).json({ error: 'Email service not configured' });
-        }
-
-        const emailResponse = await fetch('https://api.resend.com/emails', {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${resendApiKey}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                from: 'Bonsai Website <noreply@bonsai.sa>',
-                to: ['amad@bonsai.sa'],
-                subject: emailSubject,
-                html: emailBody,
-            }),
-        });
-
-        if (!emailResponse.ok) {
-            const errorData = await emailResponse.json();
-            console.error('Resend API error:', errorData);
-            return res.status(500).json({ error: 'Failed to send email' });
-        }
-
-        const data = await emailResponse.json();
-        return res.status(200).json({ success: true, messageId: data.id });
-
-    } catch (error) {
-        console.error('Error sending email:', error);
-        return res.status(500).json({ error: 'Internal server error' });
+    if (!resendApiKey) {
+      console.error('RESEND_API_KEY not configured');
+      return res.status(500).json({ error: 'Email service not configured' });
     }
+
+    const emailResponse = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${resendApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: 'Bonsai Website <noreply@bonsai.sa>',
+        to: ['arshsharmaoc@gmail.com'],
+        subject: emailSubject,
+        html: emailBody,
+      }),
+    });
+
+    if (!emailResponse.ok) {
+      const errorData = await emailResponse.json();
+      console.error('Resend API error:', errorData);
+      return res.status(500).json({ error: 'Failed to send email' });
+    }
+
+    const data = await emailResponse.json();
+    return res.status(200).json({ success: true, messageId: data.id });
+
+  } catch (error) {
+    console.error('Error sending email:', error);
+    return res.status(500).json({ error: 'Internal server error' });
+  }
 }
 
 function formatEmailBody(data: ContactFormData): string {
-    const timestamp = new Date().toLocaleString('en-US', {
-        timeZone: 'Asia/Riyadh',
-        dateStyle: 'full',
-        timeStyle: 'long'
-    });
+  const timestamp = new Date().toLocaleString('en-US', {
+    timeZone: 'Asia/Riyadh',
+    dateStyle: 'full',
+    timeStyle: 'long'
+  });
 
-    let html = `
+  let html = `
     <!DOCTYPE html>
     <html>
     <head>
@@ -192,37 +192,37 @@ function formatEmailBody(data: ContactFormData): string {
         </div>
   `;
 
-    // Add conditional fields if purchase was selected
-    if (data.contactObjective === 'purchase') {
-        if (data.unitType) {
-            html += `
+  // Add conditional fields if purchase was selected
+  if (data.contactObjective === 'purchase') {
+    if (data.unitType) {
+      html += `
         <div class="field">
           <div class="label">Preferred Unit Type</div>
           <div class="value">${data.unitType}</div>
         </div>
       `;
-        }
+    }
 
-        if (data.objective) {
-            html += `
+    if (data.objective) {
+      html += `
         <div class="field">
           <div class="label">Investment Objective</div>
           <div class="value">${data.objective}</div>
         </div>
       `;
-        }
+    }
 
-        if (data.payment) {
-            html += `
+    if (data.payment) {
+      html += `
         <div class="field">
           <div class="label">Payment Preference</div>
           <div class="value">${data.payment}</div>
         </div>
       `;
-        }
     }
+  }
 
-    html += `
+  html += `
         <div class="field">
           <div class="label">Message</div>
           <div class="message-box">${data.message.replace(/\n/g, '<br>')}</div>
@@ -248,5 +248,5 @@ function formatEmailBody(data: ContactFormData): string {
     </html>
   `;
 
-    return html;
+  return html;
 }
