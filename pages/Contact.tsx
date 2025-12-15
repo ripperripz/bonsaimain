@@ -164,8 +164,23 @@ const Contact: React.FC = () => {
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to send email');
+        let errorMessage = 'Failed to send email';
+
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch (e) {
+          // If response is not JSON, use status text
+          if (response.status === 404) {
+            errorMessage = 'Email service not found. Please deploy the site to Vercel for email functionality to work.';
+          } else if (response.status === 500) {
+            errorMessage = 'Server error. Please check if RESEND_API_KEY is configured in Vercel.';
+          } else {
+            errorMessage = `Error ${response.status}: ${response.statusText}`;
+          }
+        }
+
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
@@ -193,7 +208,17 @@ const Contact: React.FC = () => {
     } catch (error) {
       console.error('Error submitting form:', error);
       setIsSubmitting(false);
-      setFormError(error instanceof Error ? error.message : "Something went wrong. Please try again.");
+
+      // Provide detailed error message
+      let errorMessage = "Something went wrong. Please try again.";
+
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        errorMessage = "Network error. Please check your internet connection.";
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
+      setFormError(errorMessage);
     }
   };
 
