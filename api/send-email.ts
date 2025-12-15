@@ -54,7 +54,7 @@ export default async function handler(
       },
       body: JSON.stringify({
         from: 'Bonsai Website <onboarding@resend.dev>',
-        to: ['arshsharmaoc@gmail.com'],
+        to: ['arshsharmano.1@gmail.com'],
         subject: emailSubject,
         html: emailBody,
       }),

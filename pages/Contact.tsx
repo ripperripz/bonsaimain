@@ -150,41 +150,48 @@ const Contact: React.FC = () => {
         console.warn("ReCAPTCHA not loaded");
       }
 
-      // Send email via serverless API
-      const response = await fetch('/api/send-email', {
+      // EmailJS Configuration
+      const EMAILJS_SERVICE_ID = 'service_30xrwxx';
+      const EMAILJS_TEMPLATE_ID = 'template_10uyu4a';
+      const EMAILJS_PUBLIC_KEY = 'KnB6L9b78hZWX8z-u';
+
+      // Send email using EmailJS
+      const emailResponse = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          ...formData,
-          language: language,
-          recaptchaToken: recaptchaToken
-        }),
+          service_id: EMAILJS_SERVICE_ID,
+          template_id: EMAILJS_TEMPLATE_ID,
+          user_id: EMAILJS_PUBLIC_KEY,
+          template_params: {
+            to_email: 'arshsharmaoc@gmail.com', // Can be any email now!
+            from_name: `${formData.firstName} ${formData.lastName}`,
+            from_email: formData.email,
+            mobile: formData.mobile,
+            contact_objective: formData.contactObjective === 'purchase' ? 'Purchase Inquiry' : 'General Inquiry',
+            unit_type: formData.unitType || 'N/A',
+            objective: formData.objective || 'N/A',
+            payment: formData.payment || 'N/A',
+            message: formData.message,
+            language: language === 'ar' ? 'Arabic (العربية)' : 'English',
+            submission_date: new Date().toLocaleString('en-US', {
+              timeZone: 'Asia/Riyadh',
+              dateStyle: 'full',
+              timeStyle: 'long'
+            })
+          }
+        })
       });
 
-      if (!response.ok) {
-        let errorMessage = 'Failed to send email';
-
-        try {
-          const errorData = await response.json();
-          errorMessage = errorData.error || errorMessage;
-        } catch (e) {
-          // If response is not JSON, use status text
-          if (response.status === 404) {
-            errorMessage = 'Email service not found. Please deploy the site to Vercel for email functionality to work.';
-          } else if (response.status === 500) {
-            errorMessage = 'Server error. Please check if RESEND_API_KEY is configured in Vercel.';
-          } else {
-            errorMessage = `Error ${response.status}: ${response.statusText}`;
-          }
-        }
-
-        throw new Error(errorMessage);
+      if (!emailResponse.ok) {
+        const errorText = await emailResponse.text();
+        console.error('EmailJS error:', errorText);
+        throw new Error('Failed to send email. Please try again.');
       }
 
-      const data = await response.json();
-      console.log('Email sent successfully:', data);
+      console.log('Email sent successfully via EmailJS');
 
       // Success - reset form
       setIsSuccess(true);
