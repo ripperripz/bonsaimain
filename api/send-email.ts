@@ -63,10 +63,18 @@ export default async function handler(
     if (!emailResponse.ok) {
       const errorData = await emailResponse.json();
       console.error('Resend API error:', errorData);
-      return res.status(500).json({ error: 'Failed to send email' });
+      console.error('Response status:', emailResponse.status);
+      console.error('Response statusText:', emailResponse.statusText);
+
+      // Return specific error message to client
+      return res.status(500).json({
+        error: `Email service error: ${errorData.message || errorData.error || 'Unknown error'}`,
+        details: errorData
+      });
     }
 
     const data = await emailResponse.json();
+    console.log('Email sent successfully:', data);
     return res.status(200).json({ success: true, messageId: data.id });
 
   } catch (error) {
